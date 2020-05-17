@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+      deployment: uqcs
+  template: 
+    metadata:
+      labels:
+        app: frontend
+        deployment: uqcs
+    spec:
+      containers:
+      - name: frontend
+        imagePullPolicy: Always
+        image: gcr.io/cluster-171711/uqcs-frontend:latest
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+        ports:
+          - containerPort: 8080
+            name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-http
+  labels:
+    name: frontend-http
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: NodePort
+  ports:
+    - name: frontend-http
+      port: 8080
+      targetPort: http
+  selector:
+    app: frontend
