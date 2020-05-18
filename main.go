@@ -149,5 +149,11 @@ func main() {
 		})
 	})
 
+	if os.Getenv("LOADER_VERIFY") != "" {
+		r.GET(fmt.Sprintf("/%s.txt", os.Getenv("LOADER_VERIFY")), func(c *gin.Context) {
+			c.String(200, os.Getenv("LOADER_VERIFY"))
+		})
+	}
+
 	r.Run()
 }
